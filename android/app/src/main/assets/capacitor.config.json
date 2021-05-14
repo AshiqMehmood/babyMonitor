@@ -10,6 +10,6 @@
     }
   },
   "cordova": {},
-  "linuxAndroidStudioPath": "/home/mehmood/android-studio/bin/studio.sh"
+  "linuxAndroidStudioPath": "/usr/local/android-studio/bin/studio.sh"
 
 }
