@@ -3,19 +3,20 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonText, IonIcon,
    IonToggle, IonList, IonLabel, IonBadge } from '@ionic/react';
 //import ExploreContainer from '../components/ExploreContainer';
 import './Tab1.css';
-import { chatbubbleEllipsesOutline, happy, sad } from 'ionicons/icons';
+import { chatbubbleEllipsesOutline, happy, sad, closeOutline } from 'ionicons/icons';
 import { useState } from 'react';
 
-const WrapNotification = () => (
-  <div slot="end">
+const WrapNotification = (history:any) => (
+  <IonItem  lines="none" slot="end"  color="primary" routerLink="/notifications">
+   <IonBadge color="danger" >4</IonBadge>  
     <IonIcon 
     icon={chatbubbleEllipsesOutline} 
     size="large" 
-    onClick={() => console.log('notifications panel..!')}>
+    >
   </IonIcon>
-  <IonBadge color="primary">4</IonBadge>  
+  
 
-  </div>
+  </IonItem>
 )
 
 const Tab1: React.FC = () => {
@@ -25,6 +26,13 @@ const Tab1: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
+           <IonItem  lines="none"  slot="start" color="primary">
+                <IonIcon 
+                 icon={closeOutline} 
+                size="large" 
+                >
+                </IonIcon>
+            </IonItem>
           <IonTitle size="small">Baby Monitor</IonTitle>
           <WrapNotification />
         </IonToolbar>
@@ -106,9 +114,7 @@ const Tab1: React.FC = () => {
                   <IonLabel>Fan</IonLabel>
                   <IonToggle color="primary" value="fan" checked={true}/>
                 </IonItem>
-                <IonItem>
-                  <IonLabel></IonLabel>         
-                </IonItem>
+                
               </IonList>
             </IonRow>
 

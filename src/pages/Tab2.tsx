@@ -1,6 +1,6 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar
 ,IonItem, IonThumbnail, IonImg, IonIcon, IonBadge } from '@ionic/react';
-import { chatbubbleEllipsesOutline } from 'ionicons/icons';
+import { chatbubbleEllipsesOutline, closeOutline } from 'ionicons/icons';
 import {useState, useEffect} from 'react';
 import './Tab2.css';
 //@ts-ignore
@@ -9,15 +9,14 @@ import io from 'socket.io-client';
 const ENDPOINT =  "http://127.0.0.1:3000"; //change to server ip
 
 const WrapNotification = () => (
-  <div slot="end">
+  <IonItem  lines="none"  slot="end" color="primary" routerLink="/notifications">
+   <IonBadge color="danger">4</IonBadge>  
     <IonIcon 
     icon={chatbubbleEllipsesOutline} 
     size="large" 
-    onClick={() => console.log('notifications panel..!')}>
-  </IonIcon>
-  <IonBadge color="primary">4</IonBadge>  
-
-  </div>
+    >
+   </IonIcon>
+  </IonItem>
 )
 
 const Tab2: React.FC = () => {
@@ -49,6 +48,13 @@ const Tab2: React.FC = () => {
     <IonPage>
       <IonHeader>
       <IonToolbar color="primary">
+            <IonItem  lines="none"  slot="start" color="primary">
+                <IonIcon 
+                 icon={closeOutline} 
+                size="large" 
+                >
+                </IonIcon>
+            </IonItem>
           <IonTitle size="small">Baby Live</IonTitle>
           <WrapNotification />
         </IonToolbar>
