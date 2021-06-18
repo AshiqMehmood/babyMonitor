@@ -13,6 +13,7 @@ import { ellipse, square, triangle, videocamOutline, appsOutline, handLeftOutlin
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
 import Tab3 from './pages/Tab3';
+import Connect from './pages/Connect';
 import NotifyList from './pages/NotifyList';
 
 /* Core CSS required for Ionic components to work properly */
@@ -34,11 +35,35 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-const App: React.FC = () => (
+import { StateProvider } from './ContextStore';
+
+const App: React.FC = () => {
+
+  const initialState = {
+    data: { ipAddress: '192.128.3.3'}
+  };
+
+  const reducer = (state:any, action:any) => {
+    switch(action.type) {
+      case 'changeData':
+        return {
+          ...state,
+          data: action.payload
+        };
+      default:
+        return state;  
+    }
+  }
+
+  return (
   <IonApp>
+    <StateProvider initialState={initialState} reducer={reducer}>
     <IonReactRouter>
       <IonTabs>
-        <IonRouterOutlet>
+        <IonRouterOutlet> 
+        <Route exact path="/connect">
+            <Connect />
+        </Route>
           <Route exact path="/tab1">
             <Tab1 />
           </Route>
@@ -49,7 +74,7 @@ const App: React.FC = () => (
             <Tab3 />
           </Route>
           <Route exact path="/">
-            <Redirect to="/tab1" />
+            <Redirect to="/connect" />
           </Route>
           <Route exact path="/notifications">
             <NotifyList />
@@ -68,7 +93,8 @@ const App: React.FC = () => (
         </IonTabBar>
       </IonTabs>
     </IonReactRouter>
+    </StateProvider>
   </IonApp>
-);
+)};
 
 export default App;

@@ -66,11 +66,11 @@ const Tab2: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         
-        <video width="95%" height="60%" poster="assets/default.png" controls style={{margin:10}}>
-       
-        <source src="" type=""></source>
-        Cannot connect to server
-        </video>
+        <iframe 
+          allow="camera; microphone; fullscreen; display-capture; autoplay" 
+          src="https://meet.jit.si/babyMonitorTest" 
+          style={{height: "80%", width: "100%", border: "0px"}}>
+        </iframe>
             
       </IonContent>
     </IonPage>
