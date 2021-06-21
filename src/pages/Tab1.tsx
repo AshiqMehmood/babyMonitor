@@ -2,34 +2,96 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonText, IonIcon,
   IonGrid, IonRow, IonCol,IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem,
    IonToggle, IonList, IonLabel, IonBadge } from '@ionic/react';
 //import ExploreContainer from '../components/ExploreContainer';
+import Actions from './Actions';
 import './Tab1.css';
-import { chatbubbleEllipsesOutline, happy, sad, closeOutline } from 'ionicons/icons';
-import { useState } from 'react';
+import { chatbubbleEllipsesOutline, happy, sad, waterOutline, arrowBackOutline, } from 'ionicons/icons';
+import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { useStateValue } from '../ContextStore'; 
+import axios from 'axios';
 
 const WrapNotification = (history:any) => (
   <IonItem  lines="none" slot="end"  color="primary" routerLink="/notifications">
-   <IonBadge color="danger" >4</IonBadge>  
-    <IonIcon 
-    icon={chatbubbleEllipsesOutline} 
-    size="large" 
-    >
-  </IonIcon>
-  
-
+    <IonBadge color="danger" >4</IonBadge>  
+      <IonIcon 
+      icon={chatbubbleEllipsesOutline} 
+      size="large" 
+      >
+    </IonIcon>
   </IonItem>
 )
 
 const Tab1: React.FC = () => {
   const [babyStatus, setStatus] = useState({ status: 'sleeping', fill: 'green'});
+  const [apiError, setError] = useState(false); 
   //if baby is awake, status: 'awake', fill:'red'
+  //page transition
+  const history = useHistory();
+  //@ts-ignore
+  const [{data, sensorValues}, dispatch] = useStateValue();
+
+  //functions
+
+  const handleMoistureValues = (val:any) => {
+    if(val >= 900 && val <= 1023) {
+      return 'Low';
+    }
+    else if (val >= 700 && val <= 900) {
+      return 'Medium';
+    }
+    else if (val >= 300 && val <= 700) {
+      return 'High';
+    }
+    else if (val < 300) {
+      return 'Critical';
+    }
+  }
+
+  const routeChange = () => {
+    let path = '/connect';
+    history.push(path);
+  }
+
+  const fetchSensorData = async () => {
+    try {
+      const ENDPOINT = `http://${data.ipAddress}:5000/sensors`;
+     
+      const {data: res} = await axios.get(ENDPOINT);
+      //console.log(res);
+      if (res) {
+        //console.log('OK');
+        setError(false);
+      }
+      await dispatch({
+        type: 'updateSensorReadings',
+        payload: res
+      });  
+    } catch (err) {
+      setError(true);
+      console.log(err);
+      routeChange(); //redirect to connecting page
+    }
+  }
+
+//on mount
+  useEffect(() => {
+    const PERIOD = 60; //fetch data at each 10s interval
+    setInterval(() => {
+      fetchSensorData();
+    }, PERIOD * 1000)
+    console.log('fetched...>>>');
+
+  },[]);
+
+
   return (
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
            <IonItem  lines="none"  slot="start" color="primary">
                 <IonIcon 
-                 icon={closeOutline} 
-                size="large" 
+                 icon={arrowBackOutline} 
+                 size="large" 
                 >
                 </IonIcon>
             </IonItem>
@@ -53,7 +115,7 @@ const Tab1: React.FC = () => {
                             <IonCol size="8">
                               
                                     <li><b>Status:</b>&nbsp;<span style={{color: babyStatus.fill}}>{babyStatus.status}</span></li>
-                                    <li><b>Location:</b>&nbsp;<span> Jocomia 213, Slovakia </span></li>
+                                    <li><b>Location:</b>&nbsp;<span> 211 Manchester, US </span></li>
                                   
                               </IonCol>
                             
@@ -75,47 +137,56 @@ const Tab1: React.FC = () => {
             <IonRow>
                 
                           <IonCol size="6">
-                              <IonCard color="success">
+                              <IonCard color={sensorValues.temp > 29 || sensorValues.temp < 10 ? 'danger' : 'success'}>
                               <IonCardHeader>
                                 <IonCardSubtitle>Temp</IonCardSubtitle>
-                                <IonCardTitle style={{fontSize: '1.85rem'}}>27.5&#176;c</IonCardTitle>
+                                <IonCardTitle style={{fontSize: '1.85rem'}}>{sensorValues.temp}&#176;c</IonCardTitle>
                               
                               </IonCardHeader>
                               </IonCard>
                           </IonCol>
                           <IonCol size="6">
-                              <IonCard color="danger">
+                              <IonCard color={sensorValues.hum > 70 || sensorValues.hum < 30 ? 'danger' : 'success'}>
                               <IonCardHeader>
                                 <IonCardSubtitle>Humidity</IonCardSubtitle>
-                                <IonCardTitle style={{fontSize: '1.85rem'}}>89&#37;</IonCardTitle>
+                                <IonCardTitle style={{fontSize: '1.85rem'}}>{sensorValues.hum}&#37;</IonCardTitle>
                               
                               </IonCardHeader>
+                              </IonCard>
+                          </IonCol>
+                          <IonCol size="12">
+                              <IonCard color={sensorValues.moisture < 500 ? 'danger' : 'success'}>
+                              <IonCardHeader>
+                                <IonCardSubtitle>
+                                 <IonRow>
+
+                                  <IonCol size="10">
+                                        Moisture
+                                    </IonCol>
+                                    <IonCol size="2">
+                                        
+                                        <IonIcon 
+                                          icon={waterOutline} 
+                                          size="large"
+                                          >
+                                        </IonIcon>
+                                      
+                                    </IonCol>
+                                 </IonRow>
+                                  
+                                  </IonCardSubtitle> 
+                                <IonCardTitle style={{fontSize: '1.85rem'}}>
+                                  {handleMoistureValues(sensorValues.moisture)}
+                                </IonCardTitle>
+                                
+                              </IonCardHeader>
+                             
                               </IonCard>
                           </IonCol>
             </IonRow>
             <IonTitle size="small" color="medium" style={{marginTop: 10, marginBottom: 10}}>Take Action</IonTitle>
             <IonRow>
-            <IonList>
-                <IonItem>
-                  <IonLabel>Play Lullaby</IonLabel>
-                  <IonToggle color="primary" value="lullaby" checked={true}/>
-                </IonItem>
-
-                <IonItem>
-                  <IonLabel>Swing Cradle</IonLabel>
-                  <IonToggle color="primary" value="swing" checked={false}/>
-                </IonItem>
-                <IonItem>
-                  <IonLabel>Light</IonLabel>
-                  <IonToggle color="primary" value="light" checked={false}/>
-                </IonItem>
-          
-                <IonItem>
-                  <IonLabel>Fan</IonLabel>
-                  <IonToggle color="primary" value="fan" checked={true}/>
-                </IonItem>
-                
-              </IonList>
+                <Actions />
             </IonRow>
 
 

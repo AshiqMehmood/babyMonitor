@@ -3,10 +3,7 @@ import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar
 import { chatbubbleEllipsesOutline, closeOutline } from 'ionicons/icons';
 import {useState, useEffect} from 'react';
 import './Tab2.css';
-//@ts-ignore
-import io from 'socket.io-client';
-
-const ENDPOINT =  "http://127.0.0.1:3000"; //change to server ip
+import {useStateValue} from '../ContextStore';
 
 const WrapNotification = () => (
   <IonItem  lines="none"  slot="end" color="primary" routerLink="/notifications">
@@ -20,28 +17,17 @@ const WrapNotification = () => (
 )
 
 const Tab2: React.FC = () => {
-  const [goLive, setLive] = useState(false);
   const [response, setResponse] = useState(""); 
-  const [error, setError] = useState(false); //error to load live 
+  //@ts-ignore
+  const [{data}, dispatch] = useStateValue();
 
   useEffect(() => {
-    //code to fetch live from server
-    if(goLive) {
-      const socket = io(ENDPOINT, {
-        transports: ['websocket'],
-        jsonp: false,
-      });
-      //@ts-ignore
-      socket.on("FromAPI", image => {
-        setResponse(image);
-        //console.log(image);  
-      //   const imgTag = document.getElementById('image');
-      //  if(imgTag) 
-       //@ts-ignore
-      //  imgTag.src = `data:image/jpeg;charset=utf-8;base64,${image}`
-      });
-  
+
+    const videoFrame  = document.getElementById('myframe');
+    if(videoFrame) {
+      videoFrame.setAttribute('src',`http://${data.ipAddress}:8081` );
     }
+
   },[]);
 
   return (
@@ -65,13 +51,13 @@ const Tab2: React.FC = () => {
             <IonTitle size="large">Live</IonTitle>
           </IonToolbar>
         </IonHeader>
-        
-        <iframe 
-          allow="camera; microphone; fullscreen; display-capture; autoplay" 
-          src="https://meet.jit.si/babyMonitorTest" 
-          style={{height: "80%", width: "100%", border: "0px"}}>
-        </iframe>
             
+              <iframe 
+                id="myframe"
+                allow="camera; microphone; fullscreen; display-capture; autoplay"  
+                style={{ minHeight: "100%", width: "100%", border: "none"}}>
+              </iframe>
+               
       </IonContent>
     </IonPage>
   );
@@ -79,12 +65,6 @@ const Tab2: React.FC = () => {
 
 export default Tab2;
 
-//<IonItem>
-// <IonThumbnail slot="start" style={{width: '100%', height: '80%'}}>
-//             <IonImg 
-//                src={`data:image/jpeg;charset=utf-8;base64,${response}`}
-//                style={{width: '100%'}} 
-//                //onIonError={() => setError(true)}
-//             />
-//           </IonThumbnail>
-//</IonItem>
+
+
+        

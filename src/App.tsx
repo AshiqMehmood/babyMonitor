@@ -37,10 +37,12 @@ import './theme/variables.css';
 
 import { StateProvider } from './ContextStore';
 
-const App: React.FC = () => {
+
+const App: React.FC = () => { 
 
   const initialState = {
-    data: { ipAddress: '192.128.3.3'}
+    data: { ipAddress: '192.168.195.181'},
+    sensorValues: { hum: "80", temp: "25", moisture: "1020" },
   };
 
   const reducer = (state:any, action:any) => {
@@ -50,6 +52,11 @@ const App: React.FC = () => {
           ...state,
           data: action.payload
         };
+      case 'updateSensorReadings':
+        return {
+          ...state,
+          sensorValues: action.payload
+        };  
       default:
         return state;  
     }
