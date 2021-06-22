@@ -9,7 +9,7 @@ import {
   IonTabs,
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, square, triangle, videocamOutline, appsOutline, handLeftOutline } from 'ionicons/icons';
+import { ellipse, square, triangle, videocamOutline, appsOutline, handLeftOutline, notifications } from 'ionicons/icons';
 import Tab1 from './pages/Tab1';
 import Tab2 from './pages/Tab2';
 import Tab3 from './pages/Tab3';
@@ -37,13 +37,15 @@ import './theme/variables.css';
 
 import { StateProvider } from './ContextStore';
 
-
 const App: React.FC = () => { 
-
   const initialState = {
     data: { ipAddress: '192.168.195.181'},
     sensorValues: { hum: "80", temp: "25", moisture: "1020" },
+    notifications: [{ id: 0, code: 'WELCOME', alert: 'Welcome To Baby Monitor'}],
+    notifCounter: 0,
+    isConnected: false,
   };
+
 
   const reducer = (state:any, action:any) => {
     switch(action.type) {
@@ -57,6 +59,31 @@ const App: React.FC = () => {
           ...state,
           sensorValues: action.payload
         };  
+      case 'updateNotification':
+        return {
+          ...state,
+          notifications: [action.payload, ...state.notifications.filter((t:any) => t.id !== 99 )]
+        }
+      case 'deleteNotifications':
+        return {
+          ...state,
+          notifications: [action.payload]
+        }  
+      case 'setNotifyCounter':
+        return {
+          ...state,
+          notifCounter: action.payload + state.notifCounter
+        }
+      case 'resetNotifyCounter':
+        return {
+          ...state,
+          notifCounter: action.payload
+        }
+      case 'setConnected': 
+        return {
+          ...state,
+          isConnected: action.payload
+        }    
       default:
         return state;  
     }
@@ -88,7 +115,7 @@ const App: React.FC = () => {
           </Route>
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/tab1">
+           <IonTabButton tab="tab1" href="/tab1">
             <IonIcon icon={appsOutline} size="large" color="primary"/>
             
           </IonTabButton>

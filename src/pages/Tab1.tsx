@@ -1,36 +1,61 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonText, IonIcon,
   IonGrid, IonRow, IonCol,IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem,
-   IonToggle, IonList, IonLabel, IonBadge } from '@ionic/react';
+  IonToast, IonBadge } from '@ionic/react';
 //import ExploreContainer from '../components/ExploreContainer';
 import Actions from './Actions';
 import './Tab1.css';
-import { chatbubbleEllipsesOutline, happy, sad, waterOutline, arrowBackOutline, } from 'ionicons/icons';
+import { chatbubbleEllipsesOutline, happy, sad, waterOutline, arrowBackOutline, closeOutline } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useStateValue } from '../ContextStore'; 
 import axios from 'axios';
-
-const WrapNotification = (history:any) => (
-  <IonItem  lines="none" slot="end"  color="primary" routerLink="/notifications">
-    <IonBadge color="danger" >4</IonBadge>  
-      <IonIcon 
-      icon={chatbubbleEllipsesOutline} 
-      size="large" 
-      >
-    </IonIcon>
-  </IonItem>
-)
+import notificationsList from '../components/notificationList';
 
 const Tab1: React.FC = () => {
   const [babyStatus, setStatus] = useState({ status: 'sleeping', fill: 'green'});
   const [apiError, setError] = useState(false); 
   //if baby is awake, status: 'awake', fill:'red'
-  //page transition
   const history = useHistory();
   //@ts-ignore
-  const [{data, sensorValues}, dispatch] = useStateValue();
+  const [{data, sensorValues, notifications, notifCounter, isConnected}, dispatch] = useStateValue();
+  console.log(notifCounter);
+  //constants
+  const BABY_AWAKE = false;
+  const T_LOW = 11; //temp threshold
+  const T_HIGH = 29;
+  const H_LOW = 30; //humidity threshold
+  const H_HIGH = 70;
+  const M_THRESHOLD = 500; //moisture threshold
 
   //functions
+  const updateSensorNotify = async (code:string) => {
+    await dispatch({
+      type: 'updateNotification',
+      payload: notificationsList.filter((t) => t.code === code)[0]
+    });
+    await dispatch({
+      type: 'setNotifyCounter',
+      payload: 1
+    })
+  }
+  const handleNotifications = (response:any) => {
+    if(response.temp >= T_HIGH) {
+      updateSensorNotify('T_HIGH');
+    }
+    else if(response.temp <= T_LOW) {
+      updateSensorNotify('T_LOW');
+    }
+    else if(response.moisture <= M_THRESHOLD) {
+      updateSensorNotify('M_THRESHOLD');
+    }
+    else if(response.hum >= H_HIGH) {
+      updateSensorNotify('H_HIGH');
+    }
+    else if(response.hum <= H_LOW) {
+      updateSensorNotify('H_LOW');
+    }
+
+  }
 
   const handleMoistureValues = (val:any) => {
     if(val >= 900 && val <= 1023) {
@@ -60,27 +85,35 @@ const Tab1: React.FC = () => {
       //console.log(res);
       if (res) {
         //console.log('OK');
-        setError(false);
+        setError(false);  
+        await dispatch({
+          type: 'updateSensorReadings',
+          payload: res
+        }); 
+        
+       await handleNotifications(res);
       }
-      await dispatch({
-        type: 'updateSensorReadings',
-        payload: res
-      });  
     } catch (err) {
-      setError(true);
-      console.log(err);
-      routeChange(); //redirect to connecting page
+        setError(true);
+        dispatch({
+          type: 'setConnected',
+          payload: false
+        })
+        console.log(err);
+        setTimeout(() => {
+          routeChange();
+        }, 2000) //redirect to connecting page
     }
   }
 
 //on mount
   useEffect(() => {
-    const PERIOD = 60; //fetch data at each 10s interval
+    const PERIOD = 10; //fetch data at each 10s interval
     setInterval(() => {
       fetchSensorData();
     }, PERIOD * 1000)
     console.log('fetched...>>>');
-
+    
   },[]);
 
 
@@ -90,13 +123,20 @@ const Tab1: React.FC = () => {
         <IonToolbar color="primary">
            <IonItem  lines="none"  slot="start" color="primary">
                 <IonIcon 
-                 icon={arrowBackOutline} 
+                 icon={closeOutline} 
                  size="large" 
                 >
                 </IonIcon>
             </IonItem>
           <IonTitle size="small">Baby Monitor</IonTitle>
-          <WrapNotification />
+          <IonItem  lines="none" slot="end"  color="primary" routerLink="/notifications">
+            <IonBadge color="danger">{notifCounter}</IonBadge>  
+              <IonIcon 
+              icon={chatbubbleEllipsesOutline} 
+              size="large" 
+              >
+            </IonIcon>
+        </IonItem>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
@@ -137,7 +177,7 @@ const Tab1: React.FC = () => {
             <IonRow>
                 
                           <IonCol size="6">
-                              <IonCard color={sensorValues.temp > 29 || sensorValues.temp < 10 ? 'danger' : 'success'}>
+                              <IonCard color={sensorValues.temp > T_HIGH || sensorValues.temp < T_LOW ? 'danger' : 'success'}>
                               <IonCardHeader>
                                 <IonCardSubtitle>Temp</IonCardSubtitle>
                                 <IonCardTitle style={{fontSize: '1.85rem'}}>{sensorValues.temp}&#176;c</IonCardTitle>
@@ -146,7 +186,7 @@ const Tab1: React.FC = () => {
                               </IonCard>
                           </IonCol>
                           <IonCol size="6">
-                              <IonCard color={sensorValues.hum > 70 || sensorValues.hum < 30 ? 'danger' : 'success'}>
+                              <IonCard color={sensorValues.hum > H_HIGH || sensorValues.hum < H_LOW ? 'danger' : 'success'}>
                               <IonCardHeader>
                                 <IonCardSubtitle>Humidity</IonCardSubtitle>
                                 <IonCardTitle style={{fontSize: '1.85rem'}}>{sensorValues.hum}&#37;</IonCardTitle>
@@ -155,7 +195,7 @@ const Tab1: React.FC = () => {
                               </IonCard>
                           </IonCol>
                           <IonCol size="12">
-                              <IonCard color={sensorValues.moisture < 500 ? 'danger' : 'success'}>
+                              <IonCard color={sensorValues.moisture < M_THRESHOLD ? 'danger' : 'success'}>
                               <IonCardHeader>
                                 <IonCardSubtitle>
                                  <IonRow>
@@ -191,6 +231,18 @@ const Tab1: React.FC = () => {
 
 
          </IonGrid>
+         <IonToast
+                    isOpen={isConnected}
+                    //onDidDismiss={() => setShowToast(false)}
+                    message='Connection Successfull !'
+                    duration={2500}
+                />
+          <IonToast
+                    isOpen={!isConnected || apiError}
+                    //onDidDismiss={() => setShowToast(false)}
+                    message='No Connection ! Please try Again'
+                    duration={2500}
+                />      
       </IonContent>
     </IonPage>
   );
