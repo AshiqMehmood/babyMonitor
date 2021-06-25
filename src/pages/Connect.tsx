@@ -4,8 +4,8 @@ import { IonContent, IonPage, IonText, IonButton, IonInput,
 import { useHistory } from 'react-router-dom';
 import { useStateValue } from '../ContextStore'; 
 import axios from 'axios';
-import baby from '../baby.jpg'
-
+import baby from '../eve.png'
+import "./Connect.css"
 
 const Connect:React.FC = () => {
     const history = useHistory();
@@ -67,9 +67,18 @@ const Connect:React.FC = () => {
     return (
         <IonPage>    
             <IonContent fullscreen>
-                     <div style={{ display: 'flex', justifyContent: 'center', height:'200px'}}>
-                        <img style={{ width: '200px', height: '150px'}} src={baby} />
-                     </div>
+                    <IonGrid style={{ display: 'flex', justifyContent: 'center', height:'220px', marginTop: '3rem'}}>
+                        <IonRow>
+                            <IonCol size="12" style={{ display: 'flex', justifyContent: 'center' }}>
+                                <img className="robot" style={{ width: '100px', height: '150px'}} src={baby} />
+                            </IonCol>
+                            <IonCol size="12" style={{ display: 'flex', justifyContent: 'center' }}>
+                                <div className="shadow"></div>
+                            </IonCol>
+                        </IonRow>
+                       
+                    </IonGrid>
+                    
                     <IonText style={{ textAlign: 'center'}} color="primary">
                             <h4>Welcome to Baby Monitor</h4>
                     </IonText> 

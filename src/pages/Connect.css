@@ -1,0 +1,30 @@
+.robot {
+    animation-name: robo-pop;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+}
+
+@keyframes robo-pop {
+    0% { transform: translate(0, 15px); }
+    50% { transform: translate(0, 0); }
+    100% { transform: translate(0, 15px); }
+}
+
+.shadow {
+    width: 70px;
+    height: 5px;
+    border: 0 solid #d9d9d9;
+    border-radius: 50%;
+    background-color: #a8a7a7;
+    margin: 20px;
+    animation-name: shades;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    filter: blur(2px);
+}
+
+@keyframes shades {
+    0%  { transform: scaleX(-1.5); }
+    50% { transform: scaleX(-0.6); }
+    100% { transform: scaleX(-1.5); }
+}

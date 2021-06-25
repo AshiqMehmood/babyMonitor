@@ -1,6 +1,8 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonText, IonIcon,
   IonGrid, IonRow, IonCol,IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem,
-  IonToast, IonBadge } from '@ionic/react';
+  IonToast, IonBadge, IonRefresher, IonRefresherContent } from '@ionic/react';
+import { RefresherEventDetail } from '@ionic/core';
+import { chevronDownCircleOutline } from 'ionicons/icons';  
 //import ExploreContainer from '../components/ExploreContainer';
 import Actions from './Actions';
 import './Tab1.css';
@@ -28,6 +30,12 @@ const Tab1: React.FC = () => {
   const M_THRESHOLD = 500; //moisture threshold
 
   //functions
+  async function doRefresh(event: CustomEvent<RefresherEventDetail>) {
+    //console.log('Begin async operation');
+    window.location.reload();
+    
+  }
+  
   const updateSensorNotify = async (code:string) => {
     await dispatch({
       type: 'updateNotification',
@@ -90,6 +98,10 @@ const Tab1: React.FC = () => {
           type: 'updateSensorReadings',
           payload: res
         }); 
+        await dispatch({
+          type: 'setConnected',
+          payload: true
+        })
         
        await handleNotifications(res);
       }
@@ -121,14 +133,14 @@ const Tab1: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar color="primary">
-           <IonItem  lines="none"  slot="start" color="primary">
+           <IonItem  lines="none"  slot="start" color="primary" onClick={() => routeChange()}>
                 <IonIcon 
                  icon={closeOutline} 
                  size="large" 
                 >
                 </IonIcon>
             </IonItem>
-          <IonTitle size="small">Baby Monitor</IonTitle>
+          <IonTitle size="small">Dashboard</IonTitle>
           <IonItem  lines="none" slot="end"  color="primary" routerLink="/notifications">
             <IonBadge color="danger">{notifCounter}</IonBadge>  
               <IonIcon 
@@ -155,7 +167,7 @@ const Tab1: React.FC = () => {
                             <IonCol size="8">
                               
                                     <li><b>Status:</b>&nbsp;<span style={{color: babyStatus.fill}}>{babyStatus.status}</span></li>
-                                    <li><b>Location:</b>&nbsp;<span> 211 Manchester, US </span></li>
+                                    <li><b>Location:</b>&nbsp;<span> 98 Manchester, US </span></li>
                                   
                               </IonCol>
                             
@@ -231,17 +243,25 @@ const Tab1: React.FC = () => {
 
 
          </IonGrid>
+         <IonRefresher slot="fixed" onIonRefresh={doRefresh}>
+          <IonRefresherContent
+              pullingIcon={chevronDownCircleOutline}
+              pullingText="Pull to refresh"
+              refreshingSpinner="circles"
+              refreshingText="Refreshing...">
+          </IonRefresherContent>
+      </IonRefresher>
          <IonToast
                     isOpen={isConnected}
                     //onDidDismiss={() => setShowToast(false)}
                     message='Connection Successfull !'
-                    duration={2500}
+                    duration={2000}
                 />
           <IonToast
-                    isOpen={!isConnected || apiError}
+                    isOpen={!isConnected}
                     //onDidDismiss={() => setShowToast(false)}
                     message='No Connection ! Please try Again'
-                    duration={2500}
+                    duration={2000}
                 />      
       </IonContent>
     </IonPage>
