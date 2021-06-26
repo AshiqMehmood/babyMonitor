@@ -65,7 +65,7 @@ const Connect:React.FC = () => {
     }
 
     return (
-        <IonPage>    
+        <IonPage>   
             <IonContent fullscreen>
                     <IonGrid style={{ display: 'flex', justifyContent: 'center', height:'220px', marginTop: '3rem'}}>
                         <IonRow>
