@@ -112,6 +112,7 @@ const Connect:React.FC = () => {
                             </IonCol>
                         </IonRow>
                   </IonGrid>
+                  
                 <IonToast
                     isOpen={showToast}
                     onDidDismiss={() => setShowToast(false)}

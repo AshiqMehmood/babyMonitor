@@ -79,7 +79,7 @@ const Tab2: React.FC = () => {
                   allow="camera; microphone; fullscreen; display-capture; autoplay"  
                   style={{ minHeight: "100%", width: "100%", border: "none"}}>
                 </iframe> 
-                
+               
       </IonContent>
       
     </IonPage>

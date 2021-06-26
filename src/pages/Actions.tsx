@@ -1,7 +1,10 @@
 import React, {useState} from 'react';
-import { IonItem, IonToggle, IonList, IonLabel} from '@ionic/react';
+import { IonList, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonRow, IonCol, IonGrid } from '@ionic/react';
 import {useStateValue} from '../ContextStore';
 import axios from 'axios';
+import fan from '../fan.png';
+import light from '../idea.png';
+import cradle from '../cradle.png';
 
 const Actions:React.FC = () => {
     //@ts-ignore
@@ -58,39 +61,69 @@ const Actions:React.FC = () => {
     }
 
     return(
-        <IonList>
-            <IonItem>
-                <IonLabel>Swing Cradle</IonLabel>
-            <IonToggle 
-                color="primary" 
-                value="swing" 
-                checked={swingState} 
-                onIonChange={e => handleSwing(e.detail.checked)}
-            />
-            </IonItem>
-            <IonItem>
-            <IonLabel>Light</IonLabel>
-            <IonToggle 
-                color="primary" 
-                value="light" 
-                checked={lightState}
-                onIonChange={e => handleLight(e.detail.checked)}
-            />
-            </IonItem>
-    
-            <IonItem>
-            <IonLabel>Fan</IonLabel>
-            <IonToggle 
-                color="primary" 
-                value="fan" 
-                checked={fanState}
-                onIonChange={e => handleFan(e.detail.checked)}
-            />
-            </IonItem>
-            <IonItem>
-            <IonLabel></IonLabel>
-               
-            </IonItem>
+        <IonList style={{ marginBottom: '30px'}}>
+            <IonGrid>
+                <IonRow>
+                    <IonCol size="4">
+                        <IonCard 
+                            style={{ borderRadius: '20px', minWidth: '90px'}} 
+                            color={ swingState ? 'warning' : 'light'}
+                            button
+                            onClick={e => handleSwing(e.target)}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'center'}}>
+                                    <IonCardHeader style={{ textAlign: 'center'}}>
+                                        <IonCardSubtitle>Swing</IonCardSubtitle>
+                                        <IonCardTitle style={{fontSize: '1.85rem'}}>
+
+                                            <img style={{ width: '35px'}} src={cradle}/>
+                                        </IonCardTitle>
+                                    
+                                    </IonCardHeader>
+                                </div>
+                        </IonCard>
+                    </IonCol>
+                    <IonCol size="4">
+                        <IonCard 
+                         style={{ borderRadius: '20px', minWidth: '90px'}} 
+                         color={ fanState ? 'warning' : 'light'}
+                         button 
+                         onClick={e => handleFan(e.target)}
+                         >
+                                <div style={{ display: 'flex', justifyContent: 'center'}}>
+                                    <IonCardHeader style={{ textAlign: 'center'}}>
+                                        <IonCardSubtitle>Fan</IonCardSubtitle>
+                                        <IonCardTitle style={{fontSize: '1.85rem'}}>
+
+                                            <img style={{ width: '35px'}} src={fan}/>
+                                        </IonCardTitle>
+                                    
+                                    </IonCardHeader>
+                                </div>
+                        </IonCard>
+                    </IonCol>
+                    <IonCol size="4">
+                        <IonCard 
+                        style={{ borderRadius: '20px', minWidth: '90px'}} 
+                        color={ lightState ? 'warning' : 'light'}
+                        button 
+                        onClick={e => handleLight(e.target)}
+                        >
+                                <div style={{ display: 'flex', justifyContent: 'center'}}>
+                                    <IonCardHeader style={{ textAlign: 'center'}}>
+                                        <IonCardSubtitle>Light</IonCardSubtitle>
+                                        <IonCardTitle style={{fontSize: '1.85rem'}}>
+
+                                            <img style={{ width: '35px'}} src={light}/>
+                                        </IonCardTitle>
+                                    
+                                    </IonCardHeader>
+                                </div>
+                        </IonCard>
+                    </IonCol>
+                </IonRow>
+            </IonGrid>
+            
       </IonList>
     )
 }

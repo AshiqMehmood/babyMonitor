@@ -1,35 +1,45 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonText, IonIcon,
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonIcon,
   IonGrid, IonRow, IonCol,IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem,
-  IonToast, IonBadge, IonRefresher, IonRefresherContent } from '@ionic/react';
+  IonToast, IonBadge, IonRefresher, IonRefresherContent, IonAlert } from '@ionic/react';
 import { RefresherEventDetail } from '@ionic/core';
 import { chevronDownCircleOutline } from 'ionicons/icons';  
 //import ExploreContainer from '../components/ExploreContainer';
 import Actions from './Actions';
 import './Tab1.css';
 import { chatbubbleEllipsesOutline, happy, sad, waterOutline, arrowBackOutline, closeOutline } from 'ionicons/icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useStateValue } from '../ContextStore'; 
 import axios from 'axios';
 import notificationsList from '../components/notificationList';
 
+// const usePrevious = (value:any) => {
+//   const ref = useRef();
+//   useEffect(() => {
+//     ref.current = value;
+//   });
+//   return ref.current;
+// }
+
 const Tab1: React.FC = () => {
   const [babyStatus, setStatus] = useState({ status: 'sleeping', fill: 'green'});
   const [apiError, setError] = useState(false); 
+  const [cryDetected, setCry] = useState(false);
   //if baby is awake, status: 'awake', fill:'red'
   const history = useHistory();
   //@ts-ignore
   const [{data, sensorValues, notifications, notifCounter, isConnected}, dispatch] = useStateValue();
   console.log(notifCounter);
   //constants
-  const BABY_AWAKE = false;
-  const T_LOW = 11; //temp threshold
+  const T_LOW = 15; //temp threshold
   const T_HIGH = 29;
   const H_LOW = 30; //humidity threshold
-  const H_HIGH = 70;
+  const H_HIGH = 75;
   const M_THRESHOLD = 500; //moisture threshold
 
   //functions
+  //const prevCryState = usePrevious(seenMessage);
+
   async function doRefresh(event: CustomEvent<RefresherEventDetail>) {
     //console.log('Begin async operation');
     window.location.reload();
@@ -47,7 +57,12 @@ const Tab1: React.FC = () => {
     })
   }
   const handleNotifications = (response:any) => {
-    if(response.temp >= T_HIGH) {
+    if(response.cry === 1) {
+      updateSensorNotify('BABY_AWAKE');
+      setCry(true);
+      setStatus({ status: 'awake', fill: 'red'}); 
+    }
+    else if(response.temp >= T_HIGH) {
       updateSensorNotify('T_HIGH');
     }
     else if(response.temp <= T_LOW) {
@@ -102,7 +117,7 @@ const Tab1: React.FC = () => {
           type: 'setConnected',
           payload: true
         })
-        
+       
        await handleNotifications(res);
       }
     } catch (err) {
@@ -121,11 +136,12 @@ const Tab1: React.FC = () => {
 //on mount
   useEffect(() => {
     const PERIOD = 10; //fetch data at each 10s interval
-    setInterval(() => {
+    const counterInterval = setInterval(() => {
       fetchSensorData();
     }, PERIOD * 1000)
-    console.log('fetched...>>>');
+    //console.log('fetched...>>>');
     
+    return () => clearInterval(counterInterval);
   },[]);
 
 
@@ -189,19 +205,25 @@ const Tab1: React.FC = () => {
             <IonRow>
                 
                           <IonCol size="6">
-                              <IonCard color={sensorValues.temp > T_HIGH || sensorValues.temp < T_LOW ? 'danger' : 'success'}>
+                              <IonCard 
+                               color={sensorValues.temp > T_HIGH || sensorValues.temp < T_LOW ? 'danger' : 'success'}
+                               
+                               >
                               <IonCardHeader>
                                 <IonCardSubtitle>Temp</IonCardSubtitle>
-                                <IonCardTitle style={{fontSize: '1.85rem'}}>{sensorValues.temp}&#176;c</IonCardTitle>
+                                <IonCardTitle style={{fontSize: '1.85rem', textAlign: 'center'}}>{sensorValues.temp}&#176;c</IonCardTitle>
                               
                               </IonCardHeader>
                               </IonCard>
                           </IonCol>
                           <IonCol size="6">
-                              <IonCard color={sensorValues.hum > H_HIGH || sensorValues.hum < H_LOW ? 'danger' : 'success'}>
+                              <IonCard 
+                                color={sensorValues.hum > H_HIGH || sensorValues.hum < H_LOW ? 'danger' : 'success'}
+                                
+                                >
                               <IonCardHeader>
                                 <IonCardSubtitle>Humidity</IonCardSubtitle>
-                                <IonCardTitle style={{fontSize: '1.85rem'}}>{sensorValues.hum}&#37;</IonCardTitle>
+                                <IonCardTitle style={{fontSize: '1.85rem', textAlign: 'center'}}>{sensorValues.hum}&#37;</IonCardTitle>
                               
                               </IonCardHeader>
                               </IonCard>
@@ -229,6 +251,7 @@ const Tab1: React.FC = () => {
                                   </IonCardSubtitle> 
                                 <IonCardTitle style={{fontSize: '1.85rem'}}>
                                   {handleMoistureValues(sensorValues.moisture)}
+                                  <span style={{ fontSize: '1.2rem', margin: '22px'}}> { Math.round((1023 - sensorValues.moisture)/1023 * 100) }% </span>
                                 </IonCardTitle>
                                 
                               </IonCardHeader>
@@ -240,6 +263,8 @@ const Tab1: React.FC = () => {
             <IonRow>
                 <Actions />
             </IonRow>
+            
+            
 
 
          </IonGrid>
@@ -262,7 +287,15 @@ const Tab1: React.FC = () => {
                     //onDidDismiss={() => setShowToast(false)}
                     message='No Connection ! Please try Again'
                     duration={2000}
-                />      
+                />
+           <IonToast
+                    isOpen={cryDetected}
+                    //onDidDismiss={() => setShowToast(false)}
+                    message='Cry Detected. Baby is awake !'
+                    duration={5000}
+                    position="top"
+             />      
+          
       </IonContent>
     </IonPage>
   );
