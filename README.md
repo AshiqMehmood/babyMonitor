@@ -21,7 +21,7 @@ A React-js Web App compiled for android using capacitor and ionic framework.
 
 # Connectivity (localhost)
 1) Connect server and client to same network. (if server is not hosted anywhere)
-2) Start server
+2) Start server. Follow instructions at: https://github.com/AshiqMehmood/baby_live
 3) Scan for server ip address.
 4) Add to same network as server.
 5) Enter the ip_address/domain (ex: 192.168.225.100) of server to the textfield.
