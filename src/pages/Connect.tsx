@@ -37,12 +37,19 @@ const Connect:React.FC = () => {
     const verifyBackend = async (ip:any) => {
             try {
                 const ENDPOINT = `http://${ip}:5000/`;
+                const SENSORPOINT = `http://${data.ipAddress}:5000/sensors`;
             
                 const {data: res} = await axios.get(ENDPOINT);
+                const {data: sensorReadings} = await axios.get(SENSORPOINT);
                 //console.log(res);
                 if (res.message === 'connected') {
                 setLoading(false);
                 console.log('You are now connected to server..!');
+                dispatch({
+                    type: 'updateSensorReadings',
+                    payload: sensorReadings,
+                });
+                console.log('sensor values fetched..!');
                 dispatch({
                     type: 'setConnected',
                     payload: true
