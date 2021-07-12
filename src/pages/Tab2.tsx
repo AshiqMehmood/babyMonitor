@@ -37,8 +37,8 @@ const Tab2: React.FC = () => {
         }  
     } catch (err) {
         setResponse(false);
-        console.log(err); 
-        routeChange();     
+          console.log(err); 
+          
     }
 }
 

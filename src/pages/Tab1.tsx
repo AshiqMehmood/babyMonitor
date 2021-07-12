@@ -1,8 +1,8 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, IonIcon,
   IonGrid, IonRow, IonCol,IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonItem,
-  IonToast, IonBadge, IonRefresher, IonRefresherContent, IonAlert } from '@ionic/react';
+  IonToast, IonBadge, IonRefresher, IonRefresherContent, IonInput, IonLabel, IonButton } from '@ionic/react';
 import { RefresherEventDetail } from '@ionic/core';
-import { chevronDownCircleOutline } from 'ionicons/icons';  
+import { chevronDownCircleOutline, createOutline } from 'ionicons/icons';  
 //import ExploreContainer from '../components/ExploreContainer';
 import Actions from './Actions';
 import './Tab1.css';
@@ -25,6 +25,10 @@ const Tab1: React.FC = () => {
   const [babyStatus, setStatus] = useState({ status: 'sleeping', fill: 'green'});
   const [apiError, setError] = useState(false); 
   const [cryDetected, setCry] = useState(false);
+  const [placeField, setPlaceField] = useState(false);
+  const [nameField, setNameField] = useState(false);
+  const [place, setPlace] = useState('kerala,India ');
+  const [name, setName] = useState('AAAA');
   //if baby is awake, status: 'awake', fill:'red'
   const history = useHistory();
   //@ts-ignore
@@ -113,23 +117,12 @@ const Tab1: React.FC = () => {
           type: 'updateSensorReadings',
           payload: res
         }); 
-        await dispatch({
-          type: 'setConnected',
-          payload: true
-        })
        
        await handleNotifications(res);
       }
     } catch (err) {
-        setError(true);
-        dispatch({
-          type: 'setConnected',
-          payload: false
-        })
+        setError(true);  
         console.log(err);
-        setTimeout(() => {
-          routeChange();
-        }, 2000) //redirect to connecting page
     }
   }
 
@@ -139,7 +132,6 @@ const Tab1: React.FC = () => {
     const counterInterval = setInterval(() => {
       fetchSensorData();
     }, PERIOD * 1000)
-    //console.log('fetched...>>>');
     
     return () => clearInterval(counterInterval);
   },[]);
@@ -170,21 +162,52 @@ const Tab1: React.FC = () => {
       <IonContent fullscreen>
         <IonGrid>
             <IonRow>
-               <IonCard>
+               <IonCard style={{ width: '100%' }}>
                   <IonCardHeader>
                     <IonCardSubtitle>1 year 2 months</IonCardSubtitle>
-                    <IonCardTitle>Amaria Benedict</IonCardTitle>
-                   
+                    {nameField ?
+                    <IonItem>
+                      <IonInput value={name} placeholder="Enter name" onIonChange={(e) => {
+                        setName(e.detail.value!)
+                        localStorage.setItem('savedName', e.detail.value!);
+                        }}></IonInput>
+                      <IonButton onClick={() => {
+                        setName(name)
+                        localStorage.setItem('savedName', name);
+                        setNameField(false)}}>save</IonButton>
+                    </IonItem>
+                    :
+                    <IonCardTitle>{localStorage.getItem('savedName') || name} 
+                      <span>
+                       <IonIcon style={{marginLeft: '10px'}} icon={createOutline} onClick={() => setNameField(true)}></IonIcon>
+                      </span></IonCardTitle>
+                  }
+                    
                   </IonCardHeader>
 
                   <IonCardContent>
                   <IonGrid>
                         <IonRow>
                             <IonCol size="8">
-                              
+                                
                                     <li><b>Status:</b>&nbsp;<span style={{color: babyStatus.fill}}>{babyStatus.status}</span></li>
-                                    <li><b>Location:</b>&nbsp;<span> 98 Manchester, US </span></li>
+                                    { placeField ? 
+                                              <IonItem>
+                                              <IonInput value={place} placeholder="Enter a place" onIonChange={(e) => {
+                                                setPlace(e.detail.value!)
+                                                localStorage.setItem('savedPlace', e.detail.value!)
+                                                }}></IonInput>
+                                              <IonButton onClick={() => {
+                                                setPlace(place)
+                                                localStorage.setItem('savedPlace', place)
+                                                setPlaceField(false)}}>save</IonButton>
+                                            </IonItem>
                                   
+                                    : <li>   
+                                        <b>Location:</b>&nbsp;<span>{localStorage.getItem('savedPlace') || place}</span>
+                                        <IonIcon style={{marginLeft: '6px'}} icon={createOutline} onClick={() => setPlaceField(true)}></IonIcon>
+                                        </li>}
+                                     
                               </IonCol>
                             
                               <IonCol size="4">
@@ -283,9 +306,9 @@ const Tab1: React.FC = () => {
                     duration={2000}
                 />
           <IonToast
-                    isOpen={!isConnected}
+                    isOpen={apiError}
                     //onDidDismiss={() => setShowToast(false)}
-                    message='No Connection ! Please try Again'
+                    message='Unable to update sensor parameters'
                     duration={2000}
                 />
            <IonToast
